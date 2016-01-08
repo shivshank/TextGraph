@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Text Graph Editor</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+        
+        <link href='https://fonts.googleapis.com/css?family=Droid+Sans+Mono' rel='stylesheet' type='text/css'>
+        <link rel="stylesheet" href="font-awesome/css/font-awesome.min.css">
+        <link rel="stylesheet" href="main.css">
+        
+        <script src="textgraph.js"></script>
+        <script src="viewer.js"></script>
+    </head>
+    <body>
+        <header>
+            <h1>Text Graph</h1>
+            <span id="menu" class="fa fa-cog"></span>
+            <span id="help" class="fa fa-question-circle"></span>
+            <span id="save" class="fa fa-floppy-o"></span>
+            <span id="load" class="fa fa-folder-open-o"></span>
+            <span id="undo" class="fa fa-undo"></span>
+            <span id="redo" class="fa fa-repeat"></span>
+            <span id="addNode" class="fa fa-plus"></span>
+            <span id="deleteNode" class="fa fa-minus"></span>
+            <span id="link" class="fa fa-link"></span>
+            <span id="unlink" class="fa fa-chain-broken"></span>
+        </header>
+        
+        <canvas id="graph-canvas"></canvas>
+        
+        <section id="graph-viewer">
+        </section>
+        
+        <script>
+            var g = textgraph.create(),
+                v = viewer.create(g, $("#graph-viewer"), $("#graph-canvas"));
+            
+            $("#save").click( function() {
+                alert(JSON.stringify(g.export()));
+            });
+            
+            $("#undo").click( function() {
+                v.undo();
+            });
+            $("#redo").click( function() {
+                v.redo();
+            });
+            $("#addNode").click( function() {
+                g.addNode("", "");
+            });
+            $("#deleteNode").click( function() {
+                v.removeSelectedNode();
+            });
+            $("#link").click( function() {
+                if (v.state.linking === null) {
+                    v.beginLink();
+                } else {
+                    v.createLink();
+                }
+            });
+            $("#unlink").click( function() {
+                v.breakLink();
+            });
+        </script>
+    </body>
+</html>
