@@ -3,12 +3,9 @@
         properly)
     * refactor editing handler
     * fix: double clicking a text input breaks it
-    * polish undo/redo support (glitch on redo make link)
+    * polish undo/redo support
     * add help menus
     * context menu?
-    * replace icon font with svg icons?
-    * keyboard navigation and movement
-    * scaling?
  */
 (function(viewer, $, undefined){
     var create = function() {
@@ -105,7 +102,7 @@
         
         // technically drawn will always be called in _attachEvents by the
         // canvas resize, but this makes it clear that the canvas MUST be drawn
-        // once to guarantee the right styles are set on the canvas
+        // once to gaurantee the right styles are set on the canvas
         this.draw();
     };
     viewer._attachEvents = function() {
@@ -158,7 +155,10 @@
                 this.deselectNode();
             }
             
-            this._beginDragging(e);
+            if(!$(document.activeElement).is("input, textarea")) {
+                // only start dragging if the user is not typing
+                this._beginDragging(e);
+            }
         }.bind(this));
 
         this.viewer.on( "mouseup", function(e) {
@@ -177,7 +177,6 @@
             if (!this.state.dragging) {
                 return;
             }
-            
             
             if (this.state.selected !== null) {
                 // dragging a node
@@ -211,7 +210,7 @@
             "meta": meta
         });
         
-        // (could technically do one splice, but that's a little clever)
+        // (could techincally do one splice, but that's a little clever)
     };
     viewer.undo = function() {
         var action;
@@ -323,8 +322,12 @@
         this.viewer.append(viewNode);
         this.nodes[n.id] = {};
         
-        this.placeNode(n.id, (this.viewer.width() - 150) * Math.random(),
+        if (n.data && n.data.pos && n.data.pos.x && n.data.pos.y) {
+            this.placeNode(n.id, n.data.pos.x, n.data.pos.y);
+        } else {
+            this.placeNode(n.id, (this.viewer.width() - 150) * Math.random(),
                                   (this.viewer.height() - 150) * Math.random());
+        }
     };
     viewer._addLink = function(g, l) {
         this._drawLink(l);
@@ -362,7 +365,10 @@
     viewer.translateNode = function(id, x, y) {
         this.nodes[id].x += x;
         this.nodes[id].y += y;
-        
+        this.graph.getNodeById(id).data.pos = {
+            x: this.nodes[id].x,
+            y: this.nodes[id].y
+        };
         this.draw();
     };
     viewer._drawNode = function(id) {
@@ -451,11 +457,11 @@
         }
     };
     viewer.renameNode = function(id) {
-        // TODO: refactor the whole editing event thing
+        // TODO: refactor the whole editting event thing
         this.getHTMLNodeById(id).find(".node-header").trigger("dblclick");
     };
     viewer.editNodeContent = function(id) {
-        // TODO: refactor the whole editing event thing
+        // TODO: refactor the whole editting event thing
         this.getHTMLNodeById(id).find(".node-body").trigger("dblclick");
     };
     viewer.translateCamera = function(x, y) {
